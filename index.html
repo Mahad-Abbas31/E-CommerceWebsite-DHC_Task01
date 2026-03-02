@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand E-Commerce</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F7FAFC; }
+        .page-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Custom ranges and checkboxes */
+        input[type="checkbox"], input[type="radio"] { accent-color: #0D6EFD; width: 16px; height: 16px; cursor: pointer;}
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0D6EFD',
+                        secondary: '#E3F0FF',
+                        dark: '#1C1C1C',
+                        grayish: '#8B96A5',
+                        border: '#DEE2E7',
+                        success: '#00B517',
+                        danger: '#FA3434',
+                        warning: '#FF9017',
+                        bglight: '#F7FAFC'
+                    },
+                    boxShadow: {
+                        'sm': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                        'md': '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                        'floating': '0px 10px 20px rgba(0, 0, 0, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="text-dark antialiased">
+
+    <!-- Toast Container for Notifications -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Header Section -->
+    <header class="bg-white sticky top-0 z-40 shadow-sm">
+        <div class="border-b border-border">
+            <div class="container mx-auto px-4 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-4">
+                <!-- Logo -->
+                <div class="flex items-center cursor-pointer" onclick="navigate('home')">
+                    <div class="bg-primary text-white w-9 h-9 rounded flex items-center justify-center font-bold text-lg mr-2"><i class="fa-solid fa-basket-shopping"></i></div>
+                    <span class="text-2xl font-bold text-primary tracking-tight" style="color: #8CB7F5;">Brand</span>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="flex-grow max-w-2xl hidden lg:flex border-2 border-primary rounded overflow-hidden h-10">
+                    <input type="text" id="header-search" placeholder="Search products..." class="flex-grow px-3 outline-none text-sm placeholder-gray-400" onkeypress="if(event.key === 'Enter') executeSearch()">
+                    <select id="header-category" class="border-l border-border px-3 bg-white outline-none text-gray-600 text-sm focus:ring-0 cursor-pointer">
+                        <option value="All">All category</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Smartphones">Smartphones</option>
+                        <option value="Clothings">Clothings</option>
+                    </select>
+                    <button onclick="executeSearch()" class="bg-primary text-white px-6 font-medium hover:bg-blue-700 transition">Search</button>
+                </div>
+
+                <!-- User Actions -->
+                <div class="flex items-center space-x-5 text-grayish text-xs font-medium">
+                    <div class="flex flex-col items-center cursor-pointer hover:text-dark" onclick="showToast('Profile feature coming soon')">
+                        <i class="fa-solid fa-user text-lg mb-1"></i>
+                        <span>Profile</span>
+                    </div>
+                    <div class="flex flex-col items-center cursor-pointer hover:text-dark" onclick="showToast('Messages feature coming soon')">
+                        <i class="fa-solid fa-comment-dots text-lg mb-1"></i>
+                        <span>Message</span>
+                    </div>
+                    <div class="flex flex-col items-center cursor-pointer hover:text-dark hidden sm:flex" onclick="showToast('Viewing Orders...')">
+                        <i class="fa-solid fa-box text-lg mb-1"></i>
+                        <span>Orders</span>
+                    </div>
+                    <div class="flex flex-col items-center cursor-pointer hover:text-dark relative" onclick="navigate('cart')">
+                        <i class="fa-solid fa-shopping-cart text-lg mb-1"></i>
+                        <span>My cart</span>
+                        <span id="cart-badge" class="absolute -top-1 -right-2 bg-primary text-white text-[10px] font-bold rounded-full px-1.5 h-4 flex items-center justify-center hidden">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="border-b border-border hidden lg:block bg-white">
+            <div class="container mx-auto px-4 lg:px-8 py-3 flex justify-between items-center text-sm">
+                <ul class="flex space-x-6 font-medium text-dark items-center">
+                    <li class="cursor-pointer hover:text-primary flex items-center" onclick="setCategoryFilter('All')"><i class="fa-solid fa-bars mr-2"></i>All category</li>
+                    <li class="cursor-pointer hover:text-primary" onclick="setCategoryFilter('Electronics')">Hot offers</li>
+                    <li class="cursor-pointer hover:text-primary" onclick="setCategoryFilter('Clothings')">Gift boxes</li>
+                    <li class="cursor-pointer hover:text-primary" onclick="setCategoryFilter('Smartphones')">Projects</li>
+                    <li class="cursor-pointer hover:text-primary flex items-center" onclick="showToast('Help Center opened')">Help <i class="fa-solid fa-chevron-down text-[10px] text-grayish ml-1"></i></li>
+                </ul>
+                <div class="flex space-x-6 text-dark font-medium items-center">
+                    <span class="cursor-pointer flex items-center">English, USD <i class="fa-solid fa-chevron-down text-[10px] text-grayish ml-1"></i></span>
+                    <span class="cursor-pointer flex items-center">Ship to <img src="https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/1200px-Flag_of_the_United_States.svg.png" class="w-5 h-3 ml-2 mr-1 object-cover rounded-sm"> <i class="fa-solid fa-chevron-down text-[10px] text-grayish ml-1"></i></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="container mx-auto px-4 lg:px-8 py-6 min-h-[60vh]">
+        
+        <!-- ================= PAGE: HOME ================= -->
+        <div id="page-home" class="page-section active">
+            
+            <!-- Hero Banner & Menus -->
+            <div class="flex flex-col lg:flex-row gap-4 mb-6 bg-white p-4 border border-border rounded-md">
+                <!-- Sidebar Menu -->
+                <div class="lg:w-1/5 hidden lg:block">
+                    <ul class="text-gray-600 text-sm space-y-1">
+                        <li class="px-3 py-2 rounded cursor-pointer hover:bg-secondary hover:text-dark transition" onclick="setCategoryFilter('Automobiles')">Automobiles</li>
+                        <li class="px-3 py-2 rounded cursor-pointer hover:bg-secondary hover:text-dark transition" onclick="setCategoryFilter('Clothings')">Clothes and wear</li>
+                        <li class="px-3 py-2 rounded cursor-pointer hover:bg-secondary hover:text-dark transition" onclick="setCategoryFilter('Home interiors')">Home interiors</li>
+                        <li class="px-3 py-2 rounded cursor-pointer hover:bg-secondary hover:text-dark transition" onclick="setCategoryFilter('Electronics')">Computer and tech</li>
+                        <li class="px-3 py-2 rounded cursor-pointer hover:bg-secondary hover:text-dark transition" onclick="setCategoryFilter('Tools')">Tools, equipments</li>
+                        <li class="px-3 py-2 rounded cursor-pointer hover:bg-secondary hover:text-dark transition" onclick="setCategoryFilter('Sports')">Sports and outdoor</li>
+                    </ul>
+                </div>
+
+                <!-- Main Hero Image -->
+                <div class="lg:w-3/5">
+                    <div class="bg-cover bg-center h-full min-h-[350px] rounded relative overflow-hidden" style="background-image: url('https://images.unsplash.com/photo-1550009158-9ebf69173e03?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');">
+                        <div class="absolute inset-0 bg-gradient-to-r from-white via-white/70 to-transparent"></div>
+                        <div class="relative z-10 flex flex-col justify-center h-full p-10 max-w-md">
+                            <span class="text-xl mb-1 text-dark">Latest trending</span>
+                            <h2 class="text-[32px] font-bold text-dark mb-4 leading-tight">Electronic items</h2>
+                            <div><button onclick="setCategoryFilter('Electronics')" class="bg-white text-dark font-medium px-4 py-2 rounded shadow hover:bg-gray-50 transition">Learn more</button></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Action Blocks -->
+                <div class="lg:w-1/5 flex flex-col gap-3">
+                    <div class="bg-[#E3F0FF] p-3 rounded-md">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="bg-white w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-grayish"><i class="fa-solid fa-user text-xl"></i></div>
+                            <div class="text-sm">
+                                <p class="text-dark">Hi, user</p>
+                                <p class="text-gray-600">let's get started</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <button onclick="showToast('Join Now modal opened')" class="bg-primary text-white text-xs font-medium py-2 rounded w-full shadow-sm hover:bg-blue-700">Join now</button>
+                            <button onclick="showToast('Log in modal opened')" class="bg-white text-primary border border-border text-xs font-medium py-2 w-full rounded shadow-sm hover:bg-gray-50">Log in</button>
+                        </div>
+                    </div>
+                    <div class="bg-warning text-white p-4 rounded-md flex-1 flex flex-col justify-center relative overflow-hidden cursor-pointer hover:opacity-90 transition" onclick="showToast('Coupon Applied!')">
+                        <div class="relative z-10 text-sm font-medium w-3/4">Get US $10 off <br>with a new supplier</div>
+                        <div class="absolute -right-4 -bottom-4 w-16 h-16 bg-white/20 rounded-full"></div>
+                    </div>
+                    <div class="bg-[#55BDC3] text-white p-4 rounded-md flex-1 flex flex-col justify-center relative overflow-hidden cursor-pointer hover:opacity-90 transition" onclick="showToast('Supplier preferences configured')">
+                        <div class="relative z-10 text-sm font-medium w-3/4">Send quotes with <br>supplier preferences</div>
+                        <div class="absolute -right-4 -bottom-4 w-16 h-16 bg-white/20 rounded-full"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deals and Offers -->
+            <div class="bg-white border border-border rounded-md mb-6 flex flex-col md:flex-row overflow-hidden">
+                <!-- Left Title & Timer -->
+                <div class="p-5 border-r border-border md:w-[280px] flex-shrink-0">
+                    <h3 class="font-bold text-lg text-dark mb-1">Deals and offers</h3>
+                    <p class="text-gray-500 text-sm mb-4">Hygiene equipments</p>
+                    <div class="flex gap-1.5 text-center text-white text-sm font-bold">
+                        <div class="bg-gray-600 rounded p-1.5 w-11"><div class="text-base">04</div><div class="text-[10px] font-normal leading-none text-gray-300">Days</div></div>
+                        <div class="bg-gray-600 rounded p-1.5 w-11"><div class="text-base">13</div><div class="text-[10px] font-normal leading-none text-gray-300">Hour</div></div>
+                        <div class="bg-gray-600 rounded p-1.5 w-11"><div class="text-base">34</div><div class="text-[10px] font-normal leading-none text-gray-300">Min</div></div>
+                        <div class="bg-gray-600 rounded p-1.5 w-11"><div class="text-base">56</div><div class="text-[10px] font-normal leading-none text-gray-300">Sec</div></div>
+                    </div>
+                </div>
+                <!-- Products Grid (5 items) -->
+                <div class="flex-grow grid grid-cols-2 md:grid-cols-5 divide-x divide-border">
+                    <div class="p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50" onclick="showDetail(3)">
+                        <img src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Watch" class="h-28 object-contain mb-3 mix-blend-multiply">
+                        <span class="text-sm text-dark mb-2 text-center">Smart watches</span>
+                        <span class="bg-[#FFE3E3] text-[#EB001B] text-xs font-bold px-3 py-1 rounded-full">-25%</span>
+                    </div>
+                    <div class="p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50" onclick="showDetail(9)">
+                        <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Laptop" class="h-28 object-contain mb-3 mix-blend-multiply">
+                        <span class="text-sm text-dark mb-2 text-center">Laptops</span>
+                        <span class="bg-[#FFE3E3] text-[#EB001B] text-xs font-bold px-3 py-1 rounded-full">-15%</span>
+                    </div>
+                    <div class="p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 hidden sm:flex" onclick="showDetail(1)">
+                        <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Camera" class="h-28 object-contain mb-3 mix-blend-multiply">
+                        <span class="text-sm text-dark mb-2 text-center">GoPro cameras</span>
+                        <span class="bg-[#FFE3E3] text-[#EB001B] text-xs font-bold px-3 py-1 rounded-full">-40%</span>
+                    </div>
+                    <div class="p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 hidden md:flex" onclick="showDetail(4)">
+                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Headphones" class="h-28 object-contain mb-3 mix-blend-multiply">
+                        <span class="text-sm text-dark mb-2 text-center">Headphones</span>
+                        <span class="bg-[#FFE3E3] text-[#EB001B] text-xs font-bold px-3 py-1 rounded-full">-25%</span>
+                    </div>
+                    <div class="p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 hidden md:flex" onclick="showDetail(2)">
+                        <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Phone" class="h-28 object-contain mb-3 mix-blend-multiply">
+                        <span class="text-sm text-dark mb-2 text-center">Canon cameras</span>
+                        <span class="bg-[#FFE3E3] text-[#EB001B] text-xs font-bold px-3 py-1 rounded-full">-25%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Home and Outdoor Section -->
+            <div class="bg-white border border-border rounded-md mb-6 flex flex-col md:flex-row overflow-hidden">
+                <!-- Left Image Banner -->
+                <div class="md:w-[280px] p-6 relative bg-cover bg-center flex-shrink-0 min-h-[250px]" style="background-image: url('https://images.unsplash.com/photo-1513694203232-719a280e022f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80');">
+                    <div class="absolute inset-0 bg-white/20"></div>
+                    <div class="relative z-10 w-2/3 text-dark">
+                        <h3 class="font-bold text-xl mb-4 leading-tight">Home and outdoor</h3>
+                        <button class="bg-white px-4 py-2 rounded shadow-sm text-sm font-medium hover:bg-gray-50 transition" onclick="setCategoryFilter('Home interiors')">Source now</button>
+                    </div>
+                </div>
+                <!-- 2x4 Grid -->
+                <div class="flex-grow grid grid-cols-2 sm:grid-cols-4 divide-x divide-y divide-border border-l border-border">
+                    <div class="p-4 flex flex-col sm:flex-row items-center sm:items-start justify-between cursor-pointer hover:bg-gray-50" onclick="showDetail(8)">
+                        <div class="mb-2 sm:mb-0 text-center sm:text-left"><h4 class="text-sm font-medium">Soft chairs</h4><span class="text-xs text-gray-500">From USD 19</span></div>
+                        <img src="https://images.unsplash.com/photo-1592078615290-033ee584e267?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-16 h-16 object-cover rounded">
+                    </div>
+                    <div class="p-4 flex flex-col sm:flex-row items-center sm:items-start justify-between cursor-pointer hover:bg-gray-50 border-t-0" onclick="showDetail(8)">
+                        <div class="mb-2 sm:mb-0 text-center sm:text-left"><h4 class="text-sm font-medium">Sofa & chair</h4><span class="text-xs text-gray-500">From USD 19</span></div>
+                        <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-16 h-16 object-cover rounded">
+                    </div>
+                    <div class="p-4 flex flex-col sm:flex-row items-center sm:items-start justify-between cursor-pointer hover:bg-gray-50 border-t-0" onclick="setCategoryFilter('Home interiors')">
+                        <div class="mb-2 sm:mb-0 text-center sm:text-left"><h4 class="text-sm font-medium">Kitchen dishes</h4><span class="text-xs text-gray-500">From USD 19</span></div>
+                        <img src="https://images.unsplash.com/photo-1590422749906-8c9038a8e1e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-16 h-16 object-cover rounded">
+                    </div>
+                    <div class="p-4 flex flex-col sm:flex-row items-center sm:items-start justify-between cursor-pointer hover:bg-gray-50 border-t-0" onclick="showDetail(3)">
+                        <div class="mb-2 sm:mb-0 text-center sm:text-left"><h4 class="text-sm font-medium">Smart watches</h4><span class="text-xs text-gray-500">From USD 19</span></div>
+                        <img src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-16 h-16 object-cover rounded">
+                    </div>
+                    <div class="p-4 flex flex-col sm:flex-row items-center sm:items-start justify-between cursor-pointer hover:bg-gray-50 border-l-0" onclick="setCategoryFilter('Home interiors')">
+                        <div class="mb-2 sm:mb-0 text-center sm:text-left"><h4 class="text-sm font-medium">Kitchen mixer</h4><span class="text-xs text-gray-500">From USD 100</span></div>
+                        <img src="https://images.unsplash.com/photo-1585515320310-259814833e62?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-16 h-16 object-cover rounded">
+                    </div>
+                    <div class="p-4 flex flex-col sm:flex-row items-center sm:items-start justify-between cursor-pointer hover:bg-gray-50" onclick="setCategoryFilter('Home interiors')">
+                        <div class="mb-2 sm:mb-0 text-center sm:text-left"><h4 class="text-sm font-medium">Blenders</h4><span class="text-xs text-gray-500">From USD 39</span></div>
+                        <img src="https://images.unsplash.com/photo-1570222094114-d054a817e56b?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-16 h-16 object-cover rounded">
+                    </div>
+                    <div class="p-4 flex flex-col sm:flex-row items-center sm:items-start justify-between cursor-pointer hover:bg-gray-50" onclick="setCategoryFilter('Home interiors')">
+                        <div class="mb-2 sm:mb-0 text-center sm:text-left"><h4 class="text-sm font-medium">Home appliance</h4><span class="text-xs text-gray-500">From USD 19</span></div>
+                        <img src="https://images.unsplash.com/photo-1626806787426-5910811b6325?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-16 h-16 object-cover rounded">
+                    </div>
+                    <div class="p-4 flex flex-col sm:flex-row items-center sm:items-start justify-between cursor-pointer hover:bg-gray-50" onclick="setCategoryFilter('Home interiors')">
+                        <div class="mb-2 sm:mb-0 text-center sm:text-left"><h4 class="text-sm font-medium">Coffee maker</h4><span class="text-xs text-gray-500">From USD 10</span></div>
+                        <img src="https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-16 h-16 object-cover rounded">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Consumer Electronics Section -->
+            <div class="bg-white border border-border rounded-md mb-6 flex flex-col md:flex-row overflow-hidden">
+                <!-- Left Image Banner -->
+                <div class="md:w-[280px] p-6 relative bg-cover bg-center flex-shrink-0 min-h-[250px]" style="background-image: url('https://images.unsplash.com/photo-1498049794561-7780e7231661?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80');">
+                    <div class="absolute inset-0 bg-white/10"></div>
+                    <div class="relative z-10 w-2/3 text-dark">
+                        <h3 class="font-bold text-xl mb-4 leading-tight">Consumer electronics and gadgets</h3>
+                        <button class="bg-white px-4 py-2 rounded shadow-sm text-sm font-medium hover:bg-gray-50 transition" onclick="setCategoryFilter('Electronics')">Source now</button>
+                    </div>
+                </div>
+                <!-- 2x4 Grid -->
+                <div class="flex-grow grid grid-cols-2 sm:grid-cols-4 divide-x divide-y divide-border border-l border-border">
+                    <div class="p-4 flex flex-col sm:flex-row items-center sm:items-start justify-between cursor-pointer hover:bg-gray-50" onclick="showDetail(3)">
+                        <div class="mb-2 sm:mb-0 text-center sm:text-left"><h4 class="text-sm font-medium">Smart watches</h4><span class="text-xs text-gray-500">From USD 19</span></div>
+                        <img src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-16 h-16 object-cover rounded">
+                    </div>
+                    <div class="p-4 flex flex-col sm:flex-row items-center sm:items-start justify-between cursor-pointer hover:bg-gray-50 border-t-0" onclick="showDetail(2)">
+                        <div class="mb-2 sm:mb-0 text-center sm:text-left"><h4 class="text-sm font-medium">Cameras</h4><span class="text-xs text-gray-500">From USD 89</span></div>
+                        <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-16 h-16 object-cover rounded">
+                    </div>
+                    <div class="p-4 flex flex-col sm:flex-row items-center sm:items-start justify-between cursor-pointer hover:bg-gray-50 border-t-0" onclick="showDetail(4)">
+                        <div class="mb-2 sm:mb-0 text-center sm:text-left"><h4 class="text-sm font-medium">Headphones</h4><span class="text-xs text-gray-500">From USD 10</span></div>
+                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-16 h-16 object-cover rounded">
+                    </div>
+                    <div class="p-4 flex flex-col sm:flex-row items-center sm:items-start justify-between cursor-pointer hover:bg-gray-50 border-t-0" onclick="setCategoryFilter('Electronics')">
+                        <div class="mb-2 sm:mb-0 text-center sm:text-left"><h4 class="text-sm font-medium">Smart watches</h4><span class="text-xs text-gray-500">From USD 90</span></div>
+                        <img src="https://images.unsplash.com/photo-1579586337278-3befd40fd17a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-16 h-16 object-cover rounded">
+                    </div>
+                    <div class="p-4 flex flex-col sm:flex-row items-center sm:items-start justify-between cursor-pointer hover:bg-gray-50 border-l-0" onclick="setCategoryFilter('Electronics')">
+                        <div class="mb-2 sm:mb-0 text-center sm:text-left"><h4 class="text-sm font-medium">Gaming set</h4><span class="text-xs text-gray-500">From USD 35</span></div>
+                        <img src="https://images.unsplash.com/photo-1598550473360-1531e21e050e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-16 h-16 object-cover rounded">
+                    </div>
+                    <div class="p-4 flex flex-col sm:flex-row items-center sm:items-start justify-between cursor-pointer hover:bg-gray-50" onclick="showDetail(9)">
+                        <div class="mb-2 sm:mb-0 text-center sm:text-left"><h4 class="text-sm font-medium">Laptops & PC</h4><span class="text-xs text-gray-500">From USD 340</span></div>
+                        <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-16 h-16 object-cover rounded">
+                    </div>
+                    <div class="p-4 flex flex-col sm:flex-row items-center sm:items-start justify-between cursor-pointer hover:bg-gray-50" onclick="showDetail(5)">
+                        <div class="mb-2 sm:mb-0 text-center sm:text-left"><h4 class="text-sm font-medium">Smartphones</h4><span class="text-xs text-gray-500">From USD 19</span></div>
+                        <img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-16 h-16 object-cover rounded">
+                    </div>
+                    <div class="p-4 flex flex-col sm:flex-row items-center sm:items-start justify-between cursor-pointer hover:bg-gray-50" onclick="setCategoryFilter('Electronics')">
+                        <div class="mb-2 sm:mb-0 text-center sm:text-left"><h4 class="text-sm font-medium">Electric kettle</h4><span class="text-xs text-gray-500">From USD 240</span></div>
+                        <img src="https://images.unsplash.com/photo-1595246140590-ce711f5fae9d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" class="w-16 h-16 object-cover rounded">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inquiry Form Block -->
+            <div class="bg-cover bg-center relative rounded-md mb-8 overflow-hidden" style="background-image: url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80');">
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 opacity-80"></div>
+                <div class="relative z-10 flex flex-col lg:flex-row p-8 justify-between items-center gap-6">
+                    <div class="text-white lg:w-1/2">
+                        <h2 class="text-3xl font-bold mb-3 leading-tight">An easy way to send requests to all suppliers</h2>
+                        <p class="text-sm text-blue-100 max-w-md">Source items easily and securely across the globe using our integrated request system.</p>
+                    </div>
+                    <div class="bg-white rounded-md p-6 w-full lg:w-[400px] shadow-lg">
+                        <h3 class="font-bold text-xl text-dark mb-4">Send quote to suppliers</h3>
+                        <input type="text" placeholder="What item you need?" class="w-full border border-border rounded p-2.5 mb-3 outline-none text-sm placeholder-gray-400 focus:border-primary">
+                        <textarea placeholder="Type more details" class="w-full border border-border rounded p-2.5 mb-3 outline-none text-sm placeholder-gray-400 focus:border-primary resize-none" rows="3"></textarea>
+                        <div class="flex gap-2 mb-4">
+                            <input type="number" placeholder="Quantity" class="w-1/2 border border-border rounded p-2.5 outline-none text-sm placeholder-gray-400 focus:border-primary">
+                            <select class="w-1/2 border border-border rounded p-2.5 outline-none text-sm text-gray-600 focus:border-primary">
+                                <option>Pcs</option>
+                                <option>Boxes</option>
+                            </select>
+                        </div>
+                        <button onclick="showToast('Inquiry sent successfully!')" class="bg-primary hover:bg-blue-700 text-white px-5 py-2.5 rounded font-medium transition text-sm">Send inquiry</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommended Items Grid -->
+            <h3 class="font-bold text-xl text-dark mb-4">Recommended items</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8">
+                <!-- Repeated mock items -->
+                <div class="bg-white border border-border rounded p-3 hover:shadow-sm cursor-pointer" onclick="showDetail(6)">
+                    <div class="h-36 flex justify-center mb-3"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&w=150&q=80" class="max-h-full object-contain"></div>
+                    <div class="font-medium text-dark mb-1">$10.30</div>
+                    <div class="text-xs text-gray-500 line-clamp-2">T-shirts with multiple colors, for men</div>
+                </div>
+                <div class="bg-white border border-border rounded p-3 hover:shadow-sm cursor-pointer" onclick="showDetail(10)">
+                    <div class="h-36 flex justify-center mb-3"><img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?ixlib=rb-4.0.3&w=150&q=80" class="max-h-full object-contain"></div>
+                    <div class="font-medium text-dark mb-1">$10.30</div>
+                    <div class="text-xs text-gray-500 line-clamp-2">Jeans shorts for men blue color</div>
+                </div>
+                <div class="bg-white border border-border rounded p-3 hover:shadow-sm cursor-pointer" onclick="setCategoryFilter('Clothings')">
+                    <div class="h-36 flex justify-center mb-3"><img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?ixlib=rb-4.0.3&w=150&q=80" class="max-h-full object-contain"></div>
+                    <div class="font-medium text-dark mb-1">$12.50</div>
+                    <div class="text-xs text-gray-500 line-clamp-2">Brown winter coat for men</div>
+                </div>
+                <div class="bg-white border border-border rounded p-3 hover:shadow-sm cursor-pointer" onclick="setCategoryFilter('Clothings')">
+                    <div class="h-36 flex justify-center mb-3"><img src="https://images.unsplash.com/photo-1623684225794-a8f1f5037f5c?ixlib=rb-4.0.3&w=150&q=80" class="max-h-full object-contain"></div>
+                    <div class="font-medium text-dark mb-1">$34.00</div>
+                    <div class="text-xs text-gray-500 line-clamp-2">Jeans bag for travel</div>
+                </div>
+                <div class="bg-white border border-border rounded p-3 hover:shadow-sm cursor-pointer" onclick="setCategoryFilter('Clothings')">
+                    <div class="h-36 flex justify-center mb-3"><img src="https://images.unsplash.com/photo-1559563458-527698bf5295?ixlib=rb-4.0.3&w=150&q=80" class="max-h-full object-contain"></div>
+                    <div class="font-medium text-dark mb-1">$99.00</div>
+                    <div class="text-xs text-gray-500 line-clamp-2">Leather wallet</div>
+                </div>
+                <div class="bg-white border border-border rounded p-3 hover:shadow-sm cursor-pointer" onclick="showDetail(2)">
+                    <div class="h-36 flex justify-center mb-3"><img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-4.0.3&w=150&q=80" class="max-h-full object-contain"></div>
+                    <div class="font-medium text-dark mb-1">$9.99</div>
+                    <div class="text-xs text-gray-500 line-clamp-2">Canon camera black 100x zoom</div>
+                </div>
+                <div class="bg-white border border-border rounded p-3 hover:shadow-sm cursor-pointer" onclick="showDetail(4)">
+                    <div class="h-36 flex justify-center mb-3"><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&w=150&q=80" class="max-h-full object-contain"></div>
+                    <div class="font-medium text-dark mb-1">$8.99</div>
+                    <div class="text-xs text-gray-500 line-clamp-2">Headset for gaming with mic</div>
+                </div>
+                <div class="bg-white border border-border rounded p-3 hover:shadow-sm cursor-pointer" onclick="showDetail(3)">
+                    <div class="h-36 flex justify-center mb-3"><img src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?ixlib=rb-4.0.3&w=150&q=80" class="max-h-full object-contain"></div>
+                    <div class="font-medium text-dark mb-1">$10.30</div>
+                    <div class="text-xs text-gray-500 line-clamp-2">Smartwatch silver color modern</div>
+                </div>
+                <div class="bg-white border border-border rounded p-3 hover:shadow-sm cursor-pointer" onclick="setCategoryFilter('Clothings')">
+                    <div class="h-36 flex justify-center mb-3"><img src="https://images.unsplash.com/photo-1628155930542-3c7a64e2c848?ixlib=rb-4.0.3&w=150&q=80" class="max-h-full object-contain"></div>
+                    <div class="font-medium text-dark mb-1">$10.30</div>
+                    <div class="text-xs text-gray-500 line-clamp-2">Blue wallet for men leather material</div>
+                </div>
+                <div class="bg-white border border-border rounded p-3 hover:shadow-sm cursor-pointer" onclick="setCategoryFilter('Clothings')">
+                    <div class="h-36 flex justify-center mb-3"><img src="https://images.unsplash.com/photo-1584916201218-f4242ceb4809?ixlib=rb-4.0.3&w=150&q=80" class="max-h-full object-contain"></div>
+                    <div class="font-medium text-dark mb-1">$80.95</div>
+                    <div class="text-xs text-gray-500 line-clamp-2">Jeans bag for travel</div>
+                </div>
+            </div>
+
+            <!-- Our Extra Services Block -->
+            <h3 class="font-bold text-xl text-dark mb-4 mt-8">Our extra services</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white border border-border rounded-md overflow-hidden relative cursor-pointer hover:shadow-md transition group" onclick="showToast('Service: Industry Hubs')">
+                    <div class="h-32 bg-gray-200 relative">
+                        <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover mix-blend-multiply opacity-80 group-hover:opacity-100 transition">
+                    </div>
+                    <div class="p-4 pt-5 relative">
+                        <!-- Overlapping Icon -->
+                        <div class="absolute -top-7 right-4 w-12 h-12 bg-[#D1E7FF] border-2 border-white rounded-full flex items-center justify-center text-primary text-xl">
+                            <i class="fa-solid fa-search"></i>
+                        </div>
+                        <h4 class="font-medium text-dark text-[15px] mb-1 w-3/4 leading-snug">Source from Industry Hubs</h4>
+                    </div>
+                </div>
+                <div class="bg-white border border-border rounded-md overflow-hidden relative cursor-pointer hover:shadow-md transition group" onclick="showToast('Service: Customize Products')">
+                    <div class="h-32 bg-gray-200 relative">
+                        <img src="https://images.unsplash.com/photo-1565514020179-026b92b84bb6?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover mix-blend-multiply opacity-80 group-hover:opacity-100 transition">
+                    </div>
+                    <div class="p-4 pt-5 relative">
+                        <div class="absolute -top-7 right-4 w-12 h-12 bg-[#D1E7FF] border-2 border-white rounded-full flex items-center justify-center text-primary text-xl">
+                            <i class="fa-solid fa-box"></i>
+                        </div>
+                        <h4 class="font-medium text-dark text-[15px] mb-1 w-3/4 leading-snug">Customize Your Products</h4>
+                    </div>
+                </div>
+                <div class="bg-white border border-border rounded-md overflow-hidden relative cursor-pointer hover:shadow-md transition group" onclick="showToast('Service: Ocean and Air Shipping')">
+                    <div class="h-32 bg-gray-200 relative">
+                        <img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover mix-blend-multiply opacity-80 group-hover:opacity-100 transition">
+                    </div>
+                    <div class="p-4 pt-5 relative">
+                        <div class="absolute -top-7 right-4 w-12 h-12 bg-[#D1E7FF] border-2 border-white rounded-full flex items-center justify-center text-primary text-xl">
+                            <i class="fa-solid fa-plane"></i>
+                        </div>
+                        <h4 class="font-medium text-dark text-[15px] mb-1 w-3/4 leading-snug">Fast, reliable shipping by ocean or air</h4>
+                    </div>
+                </div>
+                <div class="bg-white border border-border rounded-md overflow-hidden relative cursor-pointer hover:shadow-md transition group" onclick="showToast('Service: Monitoring and Inspection')">
+                    <div class="h-32 bg-gray-200 relative">
+                        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover mix-blend-multiply opacity-80 group-hover:opacity-100 transition">
+                    </div>
+                    <div class="p-4 pt-5 relative">
+                        <div class="absolute -top-7 right-4 w-12 h-12 bg-[#D1E7FF] border-2 border-white rounded-full flex items-center justify-center text-primary text-xl">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <h4 class="font-medium text-dark text-[15px] mb-1 w-3/4 leading-snug">Product monitoring and inspection</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suppliers by Region -->
+            <h3 class="font-bold text-xl text-dark mb-4 mt-8">Suppliers by region</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-y-4 gap-x-2 mb-8">
+                <div class="flex items-center gap-3 cursor-pointer hover:opacity-80" onclick="showToast('Viewing suppliers in Arabic Emirates')"><img src="https://flagcdn.com/w40/ae.png" class="w-7 h-5 object-cover"><div><div class="text-dark text-sm">Arabic Emirates</div><div class="text-xs text-gray-500">shopname.ae</div></div></div>
+                <div class="flex items-center gap-3 cursor-pointer hover:opacity-80" onclick="showToast('Viewing suppliers in Australia')"><img src="https://flagcdn.com/w40/au.png" class="w-7 h-5 object-cover"><div><div class="text-dark text-sm">Australia</div><div class="text-xs text-gray-500">shopname.ae</div></div></div>
+                <div class="flex items-center gap-3 cursor-pointer hover:opacity-80" onclick="showToast('Viewing suppliers in United States')"><img src="https://flagcdn.com/w40/us.png" class="w-7 h-5 object-cover"><div><div class="text-dark text-sm">United States</div><div class="text-xs text-gray-500">shopname.ae</div></div></div>
+                <div class="flex items-center gap-3 cursor-pointer hover:opacity-80" onclick="showToast('Viewing suppliers in Russia')"><img src="https://flagcdn.com/w40/ru.png" class="w-7 h-5 object-cover"><div><div class="text-dark text-sm">Russia</div><div class="text-xs text-gray-500">shopname.ru</div></div></div>
+                <div class="flex items-center gap-3 cursor-pointer hover:opacity-80" onclick="showToast('Viewing suppliers in Italy')"><img src="https://flagcdn.com/w40/it.png" class="w-7 h-5 object-cover"><div><div class="text-dark text-sm">Italy</div><div class="text-xs text-gray-500">shopname.it</div></div></div>
+                <div class="flex items-center gap-3 cursor-pointer hover:opacity-80" onclick="showToast('Viewing suppliers in Denmark')"><img src="https://flagcdn.com/w40/dk.png" class="w-7 h-5 object-cover"><div><div class="text-dark text-sm">Denmark</div><div class="text-xs text-gray-500">denmark.com.dk</div></div></div>
+                <div class="flex items-center gap-3 cursor-pointer hover:opacity-80" onclick="showToast('Viewing suppliers in France')"><img src="https://flagcdn.com/w40/fr.png" class="w-7 h-5 object-cover"><div><div class="text-dark text-sm">France</div><div class="text-xs text-gray-500">shopname.com.fr</div></div></div>
+                <div class="flex items-center gap-3 cursor-pointer hover:opacity-80" onclick="showToast('Viewing suppliers in Arabic Emirates')"><img src="https://flagcdn.com/w40/ae.png" class="w-7 h-5 object-cover"><div><div class="text-dark text-sm">Arabic Emirates</div><div class="text-xs text-gray-500">shopname.ae</div></div></div>
+                <div class="flex items-center gap-3 cursor-pointer hover:opacity-80" onclick="showToast('Viewing suppliers in China')"><img src="https://flagcdn.com/w40/cn.png" class="w-7 h-5 object-cover"><div><div class="text-dark text-sm">China</div><div class="text-xs text-gray-500">shopname.ae</div></div></div>
+                <div class="flex items-center gap-3 cursor-pointer hover:opacity-80" onclick="showToast('Viewing suppliers in Great Britain')"><img src="https://flagcdn.com/w40/gb.png" class="w-7 h-5 object-cover"><div><div class="text-dark text-sm">Great Britain</div><div class="text-xs text-gray-500">shopname.co.uk</div></div></div>
+            </div>
+        </div>
+
+        <!-- ================= PAGE: PRODUCTS ================= -->
+        <div id="page-products" class="page-section">
+            <div class="text-sm text-grayish mb-4">
+                <span class="cursor-pointer hover:text-primary" onclick="navigate('home')">Home</span> <i class="fa-solid fa-chevron-right text-[10px] mx-2"></i>
+                <span class="text-gray-500" id="breadcrumb-category">All Categories</span>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Sidebar Filters -->
+                <aside class="lg:w-[240px] hidden md:block flex-shrink-0">
+                    <div class="border-t border-border py-4">
+                        <h4 class="font-bold flex justify-between items-center cursor-pointer mb-3">Category <i class="fa-solid fa-chevron-up text-grayish text-xs"></i></h4>
+                        <ul class="text-gray-600 text-[15px] space-y-2.5" id="filter-categories-list">
+                            <!-- Populated via JS -->
+                        </ul>
+                    </div>
+                    <div class="border-t border-border py-4">
+                        <h4 class="font-bold flex justify-between items-center cursor-pointer mb-3">Brands <i class="fa-solid fa-chevron-up text-grayish text-xs"></i></h4>
+                        <ul class="text-gray-600 text-[15px] space-y-2.5" id="filter-brands-list">
+                            <!-- Populated via JS -->
+                        </ul>
+                    </div>
+                    <div class="border-t border-border py-4">
+                        <h4 class="font-bold flex justify-between items-center cursor-pointer mb-3">Features <i class="fa-solid fa-chevron-up text-grayish text-xs"></i></h4>
+                        <ul class="text-gray-600 text-[15px] space-y-2.5" id="filter-features-list">
+                            <!-- Populated via JS -->
+                        </ul>
+                    </div>
+                    <div class="border-t border-border py-4">
+                        <h4 class="font-bold flex justify-between items-center cursor-pointer mb-4">Price range <i class="fa-solid fa-chevron-up text-grayish text-xs"></i></h4>
+                        <div class="flex gap-2 mb-3">
+                            <div class="flex-1">
+                                <label class="text-xs text-gray-500 mb-1 block">Min</label>
+                                <input type="number" id="filter-price-min" placeholder="0" class="w-full border border-border rounded px-2 py-1.5 text-sm outline-none focus:border-primary">
+                            </div>
+                            <div class="flex-1">
+                                <label class="text-xs text-gray-500 mb-1 block">Max</label>
+                                <input type="number" id="filter-price-max" placeholder="9999" class="w-full border border-border rounded px-2 py-1.5 text-sm outline-none focus:border-primary">
+                            </div>
+                        </div>
+                        <button onclick="applyFilters()" class="w-full bg-white border border-border rounded text-primary font-medium py-2 hover:bg-gray-50 shadow-sm transition">Apply</button>
+                    </div>
+                    <div class="border-t border-border py-4">
+                        <h4 class="font-bold flex justify-between items-center cursor-pointer mb-3">Condition <i class="fa-solid fa-chevron-up text-grayish text-xs"></i></h4>
+                        <ul class="text-gray-600 text-[15px] space-y-2.5">
+                            <li><label class="flex items-center cursor-pointer"><input type="radio" name="filter-condition" value="Any" class="mr-3 accent-primary" onchange="applyFilters()" checked> Any</label></li>
+                            <li><label class="flex items-center cursor-pointer"><input type="radio" name="filter-condition" value="Refurbished" class="mr-3 accent-primary" onchange="applyFilters()"> Refurbished</label></li>
+                            <li><label class="flex items-center cursor-pointer"><input type="radio" name="filter-condition" value="Brand new" class="mr-3 accent-primary" onchange="applyFilters()"> Brand new</label></li>
+                        </ul>
+                    </div>
+                </aside>
+
+                <!-- Products Main Area -->
+                <div class="flex-grow">
+                    <!-- Top Bar -->
+                    <div class="bg-white border border-border rounded-md p-3 mb-4 flex flex-wrap justify-between items-center gap-3">
+                        <span class="text-dark"><span id="product-count" class="font-bold">0</span> items found</span>
+                        <div class="flex items-center gap-4 text-[15px]">
+                            <label class="flex items-center cursor-pointer text-dark hidden sm:flex"><input type="checkbox" class="mr-2" onchange="showToast('Verified only filtered')"> Verified only</label>
+                            <div class="border border-border rounded px-3 py-1.5 cursor-pointer text-dark hidden sm:block">
+                                Featured <i class="fa-solid fa-chevron-down text-xs ml-2 text-grayish"></i>
+                            </div>
+                            <!-- View Toggles -->
+                            <div class="flex border border-border rounded overflow-hidden shadow-sm">
+                                <button onclick="toggleProductView('grid')" id="btn-view-grid" class="bg-[#EFF2F4] px-3 py-1.5 text-dark hover:bg-gray-200 border-r border-border"><i class="fa-solid fa-table-cells"></i></button>
+                                <button onclick="toggleProductView('list')" id="btn-view-list" class="bg-white px-3 py-1.5 text-grayish hover:bg-gray-100"><i class="fa-solid fa-list"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Active Filters -->
+                    <div id="active-filters-container" class="flex flex-wrap gap-2 mb-5">
+                        <!-- Injected via JS -->
+                    </div>
+
+                    <!-- Products Container -->
+                    <div id="products-container" class="grid grid-cols-1 gap-4">
+                        <!-- Injected via JS -->
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="flex justify-end mt-8">
+                        <div class="flex items-center gap-3">
+                            <select class="border border-border rounded px-3 py-2 text-dark text-sm bg-white outline-none cursor-pointer">
+                                <option>Show 10</option>
+                                <option>Show 20</option>
+                            </select>
+                            <div class="flex border border-border rounded bg-white overflow-hidden shadow-sm" id="pagination-controls">
+                                <button class="px-4 py-2 border-r border-border text-gray-400 hover:bg-gray-50 bg-gray-50 cursor-not-allowed"><i class="fa-solid fa-chevron-left"></i></button>
+                                <button class="px-4 py-2 border-r border-border bg-[#EFF2F4] text-gray-600 font-medium">1</button>
+                                <button onclick="showToast('Loading page 2...')" class="px-4 py-2 border-r border-border text-dark hover:bg-gray-50">2</button>
+                                <button onclick="showToast('Loading next page...')" class="px-4 py-2 text-dark hover:bg-gray-50"><i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PAGE: PRODUCT DETAIL ================= -->
+        <div id="page-detail" class="page-section">
+            <div class="text-sm text-grayish mb-4">
+                <span class="cursor-pointer hover:text-primary" onclick="navigate('home')">Home</span> <i class="fa-solid fa-chevron-right text-[10px] mx-2"></i>
+                <span class="cursor-pointer hover:text-primary" onclick="navigate('products')">Products</span> <i class="fa-solid fa-chevron-right text-[10px] mx-2"></i>
+                <span class="text-gray-500" id="detail-breadcrumb">Detail</span>
+            </div>
+
+            <div class="bg-white border border-border rounded-md p-4 lg:p-6 mb-6">
+                <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
+                    <!-- Image Gallery -->
+                    <div class="lg:w-[350px] flex-shrink-0">
+                        <div class="border border-border rounded mb-3 flex items-center justify-center p-4 bg-white h-[350px] cursor-pointer relative" onclick="showToast('Opening full image gallery')">
+                            <img id="detail-main-img" src="" alt="Product" class="max-h-full max-w-full object-contain transition-opacity duration-300">
+                            <button onclick="event.stopPropagation(); showToast('Added to wishlist!')" class="absolute top-4 right-4 text-grayish bg-white border border-border rounded-full w-9 h-9 flex items-center justify-center hover:text-primary shadow-sm"><i class="fa-solid fa-heart"></i></button>
+                        </div>
+                        <div class="flex gap-2" id="detail-thumbnails">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="flex-grow">
+                        <div class="text-success text-sm font-medium mb-1"><i class="fa-solid fa-check mr-1"></i> In stock</div>
+                        <h1 id="detail-title" class="text-xl font-bold text-dark mb-2">Product Name</h1>
+                        <div class="flex flex-wrap items-center text-sm gap-4 mb-4 text-gray-500">
+                            <div class="text-warning"><i class="fa-solid fa-star"></i> <i class="fa-solid fa-star"></i> <i class="fa-solid fa-star"></i> <i class="fa-solid fa-star"></i> <i class="fa-solid fa-star-half-stroke"></i> <span id="detail-rating" class="text-warning font-bold ml-1">4.5</span></div>
+                            <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                            <div class="flex items-center gap-1.5 cursor-pointer hover:text-primary" onclick="switchDetailTab('reviews')"><i class="fa-solid fa-message text-grayish"></i> <span id="detail-reviews-count">32</span> reviews</div>
+                            <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                            <div class="flex items-center gap-1.5"><i class="fa-solid fa-basket-shopping text-grayish"></i> <span id="detail-orders">154</span> sold</div>
+                        </div>
+
+                        <!-- Price block -->
+                        <div class="bg-[#FFF0DF] rounded mb-5 flex max-w-md divide-x divide-white border border-[#FBE1C5]">
+                            <div class="p-3 px-4 flex-1">
+                                <div class="text-danger font-bold text-[22px] mb-1">$<span id="detail-price">0.00</span></div>
+                                <div class="text-[13px] text-gray-600 font-medium">Retail Price</div>
+                            </div>
+                        </div>
+
+                        <!-- Attributes -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-8 text-[15px] border-b border-border pb-5 mb-5">
+                            <div class="flex"><span class="text-gray-500 w-32">Brand:</span><span class="text-dark" id="detail-brand">BrandName</span></div>
+                            <div class="flex"><span class="text-gray-500 w-32">Condition:</span><span class="text-dark" id="detail-condition">Brand new</span></div>
+                            <div class="flex"><span class="text-gray-500 w-32">Features:</span><span class="text-dark" id="detail-features">Features list</span></div>
+                            <div class="flex"><span class="text-gray-500 w-32">Warranty:</span><span class="text-dark">1 year full warranty</span></div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="addCurrentToCart(event)" class="bg-primary hover:bg-blue-700 shadow text-white font-medium px-8 py-2.5 rounded transition">Add to Cart</button>
+                            <button onclick="saveCurrentForLater()" class="bg-white border border-border shadow-sm hover:bg-gray-50 text-primary font-medium px-6 py-2.5 rounded transition"><i class="fa-solid fa-heart mr-2"></i> Save for later</button>
+                        </div>
+                    </div>
+
+                    <!-- Supplier Info -->
+                    <div class="lg:w-[280px] flex-shrink-0">
+                        <div class="border border-border rounded p-4 shadow-sm bg-white">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="bg-[#C6F1E7] text-[#00A077] w-12 h-12 rounded flex items-center justify-center font-bold text-xl">S</div>
+                                <div>
+                                    <div class="font-medium text-dark">Verified Supplier</div>
+                                    <div class="text-gray-500 text-sm">Global Store</div>
+                                </div>
+                            </div>
+                            <div class="border-b border-border mb-4"></div>
+                            <ul class="text-[15px] text-gray-500 space-y-3 mb-5">
+                                <li class="flex items-center gap-3"><i class="fa-solid fa-shield-halved text-grayish w-5"></i> Verified Seller</li>
+                                <li class="flex items-center gap-3"><i class="fa-solid fa-globe text-grayish w-5"></i> Worldwide shipping</li>
+                            </ul>
+                            <div class="border-b border-border mb-4"></div>
+                            <button onclick="showToast('Inquiry dialog opened')" class="w-full bg-primary hover:bg-blue-700 text-white font-medium py-2 rounded mb-2 transition">Send inquiry</button>
+                            <button onclick="switchDetailTab('seller');" class="w-full bg-white border border-border hover:bg-gray-50 text-primary font-medium py-2 rounded transition">Seller's profile</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col lg:flex-row gap-6 mb-8">
+                <!-- Details Tabs Area -->
+                <div class="flex-grow bg-white border border-border rounded-md h-fit">
+                    <div class="flex border-b border-border text-[15px] font-medium text-gray-500 overflow-x-auto hide-scrollbar">
+                        <div id="tab-desc" onclick="switchDetailTab('desc')" class="detail-tab-btn px-6 py-3.5 border-b-2 border-primary text-primary cursor-pointer whitespace-nowrap">Description</div>
+                        <div id="tab-reviews" onclick="switchDetailTab('reviews')" class="detail-tab-btn px-6 py-3.5 border-b-2 border-transparent hover:text-dark cursor-pointer whitespace-nowrap">Reviews</div>
+                        <div id="tab-shipping" onclick="switchDetailTab('shipping')" class="detail-tab-btn px-6 py-3.5 border-b-2 border-transparent hover:text-dark cursor-pointer whitespace-nowrap">Shipping</div>
+                        <div id="tab-seller" onclick="switchDetailTab('seller')" class="detail-tab-btn px-6 py-3.5 border-b-2 border-transparent hover:text-dark cursor-pointer whitespace-nowrap">About seller</div>
+                    </div>
+                    
+                    <!-- Tab Contents -->
+                    <div id="content-desc" class="detail-tab-content p-6 text-gray-600 text-[15px] leading-relaxed block">
+                        <p id="detail-description-text"></p>
+                        <br>
+                        <table class="w-full md:w-[60%] min-w-[300px] mt-2 border border-border">
+                            <tr class="border-b border-border"><td class="bg-[#EFF2F4] p-2.5 text-gray-500 w-1/3 border-r border-border">Condition</td><td class="p-2.5 text-dark" id="desc-table-cond">Brand new</td></tr>
+                            <tr class="border-b border-border"><td class="bg-[#EFF2F4] p-2.5 text-gray-500 border-r border-border">Brand</td><td class="p-2.5 text-dark" id="desc-table-brand">Generic</td></tr>
+                            <tr class="border-b border-border"><td class="bg-[#EFF2F4] p-2.5 text-gray-500 border-r border-border">Certificate</td><td class="p-2.5 text-dark">ISO-898921212</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div id="content-reviews" class="detail-tab-content p-6 text-gray-600 text-[15px] leading-relaxed hidden">
+                        <h4 class="font-bold text-dark text-lg mb-4">Customer Reviews</h4>
+                        <div class="border-b border-border pb-4 mb-4">
+                            <div class="flex justify-between mb-2">
+                                <span class="font-medium text-dark">Verified Buyer</span>
+                                <span class="text-sm text-gray-400">2 days ago</span>
+                            </div>
+                            <div class="text-warning text-xs mb-2"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                            <p>Great product! Matches the description perfectly and shipped really fast. Highly recommend.</p>
+                        </div>
+                    </div>
+
+                    <div id="content-shipping" class="detail-tab-content p-6 text-gray-600 text-[15px] leading-relaxed hidden">
+                        <h4 class="font-bold text-dark text-lg mb-4">Shipping Information</h4>
+                        <ul class="space-y-3">
+                            <li><i class="fa-solid fa-plane text-grayish mr-2 w-5"></i> <strong>Standard Shipping:</strong> 5-10 business days (Free)</li>
+                            <li><i class="fa-solid fa-rocket text-grayish mr-2 w-5"></i> <strong>Express Shipping:</strong> 2-4 business days ($15.00)</li>
+                        </ul>
+                    </div>
+
+                    <div id="content-seller" class="detail-tab-content p-6 text-gray-600 text-[15px] leading-relaxed hidden">
+                        <h4 class="font-bold text-dark text-lg mb-4">About the Supplier</h4>
+                        <p class="mb-4">We specialize in high-quality products, modern tech gadgets, and accessories shipped globally.</p>
+                        <button onclick="showToast('Viewing seller profile catalog')" class="bg-white border border-border px-4 py-2 rounded text-primary hover:bg-gray-50 transition">View full catalog</button>
+                    </div>
+                </div>
+
+                <!-- You may like sidebar -->
+                <div class="lg:w-[280px] flex-shrink-0 bg-white border border-border rounded-md p-4">
+                    <h3 class="font-bold text-dark mb-4">You may like</h3>
+                    <div class="flex flex-col gap-4" id="detail-sidebar-recommended">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Products -->
+            <div class="bg-white border border-border rounded-md p-5 mb-8">
+                <h3 class="font-bold text-xl text-dark mb-4">Related products</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                    <div class="cursor-pointer group" onclick="showDetail(5)">
+                        <div class="bg-[#EFF2F4] rounded h-32 flex items-center justify-center p-2 mb-3"><img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?ixlib=rb-4.0.3&w=150&q=80" class="max-h-full object-contain mix-blend-multiply group-hover:scale-105 transition"></div>
+                        <div class="text-[14px] text-dark mb-1 leading-snug">Xiaomi Redmi 8 Original</div>
+                        <div class="text-[15px] text-gray-500">$32.00 - $40.00</div>
+                    </div>
+                    <div class="cursor-pointer group" onclick="showDetail(5)">
+                        <div class="bg-[#EFF2F4] rounded h-32 flex items-center justify-center p-2 mb-3"><img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?ixlib=rb-4.0.3&w=150&q=80" class="max-h-full object-contain mix-blend-multiply group-hover:scale-105 transition"></div>
+                        <div class="text-[14px] text-dark mb-1 leading-snug">Xiaomi Redmi 8 Original</div>
+                        <div class="text-[15px] text-gray-500">$32.00 - $40.00</div>
+                    </div>
+                    <div class="cursor-pointer group" onclick="showDetail(5)">
+                        <div class="bg-[#EFF2F4] rounded h-32 flex items-center justify-center p-2 mb-3"><img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?ixlib=rb-4.0.3&w=150&q=80" class="max-h-full object-contain mix-blend-multiply group-hover:scale-105 transition"></div>
+                        <div class="text-[14px] text-dark mb-1 leading-snug">Xiaomi Redmi 8 Original</div>
+                        <div class="text-[15px] text-gray-500">$32.00 - $40.00</div>
+                    </div>
+                    <div class="cursor-pointer group" onclick="showDetail(5)">
+                        <div class="bg-[#EFF2F4] rounded h-32 flex items-center justify-center p-2 mb-3"><img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?ixlib=rb-4.0.3&w=150&q=80" class="max-h-full object-contain mix-blend-multiply group-hover:scale-105 transition"></div>
+                        <div class="text-[14px] text-dark mb-1 leading-snug">Xiaomi Redmi 8 Original</div>
+                        <div class="text-[15px] text-gray-500">$32.00 - $40.00</div>
+                    </div>
+                    <div class="cursor-pointer group" onclick="showDetail(5)">
+                        <div class="bg-[#EFF2F4] rounded h-32 flex items-center justify-center p-2 mb-3"><img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?ixlib=rb-4.0.3&w=150&q=80" class="max-h-full object-contain mix-blend-multiply group-hover:scale-105 transition"></div>
+                        <div class="text-[14px] text-dark mb-1 leading-snug">Xiaomi Redmi 8 Original</div>
+                        <div class="text-[15px] text-gray-500">$32.00 - $40.00</div>
+                    </div>
+                    <div class="cursor-pointer group" onclick="showDetail(5)">
+                        <div class="bg-[#EFF2F4] rounded h-32 flex items-center justify-center p-2 mb-3"><img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?ixlib=rb-4.0.3&w=150&q=80" class="max-h-full object-contain mix-blend-multiply group-hover:scale-105 transition"></div>
+                        <div class="text-[14px] text-dark mb-1 leading-snug">Xiaomi Redmi 8 Original</div>
+                        <div class="text-[15px] text-gray-500">$32.00 - $40.00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PAGE: CART ================= -->
+        <div id="page-cart" class="page-section">
+            <h2 class="text-2xl font-bold mb-6 text-dark">My cart (<span id="cart-count-header">0</span>)</h2>
+            <div class="flex flex-col lg:flex-row gap-6">
+                
+                <!-- Cart Items List -->
+                <div class="lg:w-3/4">
+                    <div class="bg-white border border-border rounded-md mb-4 shadow-sm" id="cart-items-container">
+                        <!-- Items injected via JS -->
+                    </div>
+                    
+                    <div class="flex justify-between items-center mb-10">
+                        <button onclick="navigate('products')" class="bg-primary text-white font-medium px-5 py-2.5 rounded hover:bg-blue-700 transition shadow-sm"><i class="fa-solid fa-arrow-left mr-2"></i> Back to shop</button>
+                        <button onclick="clearCart();" class="bg-white border border-border text-primary font-medium px-5 py-2.5 rounded hover:bg-gray-50 transition shadow-sm">Remove all</button>
+                    </div>
+
+                    <!-- Additional Info (Trust Badges) -->
+                    <div class="flex flex-col md:flex-row gap-4 mb-10">
+                        <div class="flex items-center gap-3 flex-1 cursor-pointer hover:opacity-80 transition" onclick="showToast('Read about Secure Payment')">
+                            <div class="bg-gray-200 text-gray-500 w-12 h-12 rounded-full flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-lock"></i></div>
+                            <div>
+                                <div class="font-medium text-dark">Secure payment</div>
+                                <div class="text-[13px] text-gray-500">Have you ever finally just</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 flex-1 cursor-pointer hover:opacity-80 transition" onclick="showToast('Contacting Customer Support...')">
+                            <div class="bg-gray-200 text-gray-500 w-12 h-12 rounded-full flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-message"></i></div>
+                            <div>
+                                <div class="font-medium text-dark">Customer support</div>
+                                <div class="text-[13px] text-gray-500">Have you ever finally just</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 flex-1 cursor-pointer hover:opacity-80 transition" onclick="showToast('Read Delivery Policy')">
+                            <div class="bg-gray-200 text-gray-500 w-12 h-12 rounded-full flex items-center justify-center text-xl flex-shrink-0"><i class="fa-solid fa-truck"></i></div>
+                            <div>
+                                <div class="font-medium text-dark">Free delivery</div>
+                                <div class="text-[13px] text-gray-500">Have you ever finally just</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Checkout Summary -->
+                <div class="lg:w-1/4">
+                    <div class="bg-white border border-border rounded-md p-4 mb-4 shadow-sm">
+                        <label class="block text-[15px] text-gray-600 mb-2">Have a coupon?</label>
+                        <div class="flex border border-border rounded overflow-hidden">
+                            <input type="text" placeholder="Add coupon" class="w-full px-3 py-2 outline-none text-[15px] placeholder-gray-400">
+                            <button onclick="showToast('Coupon applied successfully!')" class="bg-white border-l border-border px-4 py-2 text-primary font-medium hover:bg-gray-50 transition">Apply</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-border rounded-md p-4 shadow-sm">
+                        <div class="flex justify-between text-gray-600 mb-2 text-[15px]">
+                            <span>Subtotal:</span>
+                            <span id="cart-subtotal" class="font-medium text-dark">$0.00</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600 mb-2 text-[15px]">
+                            <span>Discount:</span>
+                            <span class="text-danger font-medium">- $0.00</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600 mb-4 text-[15px] pb-4 border-b border-border">
+                            <span>Tax (10%):</span>
+                            <span id="cart-tax" class="text-success font-medium">+ $0.00</span>
+                        </div>
+                        <div class="flex justify-between font-bold text-xl mb-6">
+                            <span>Total:</span>
+                            <span id="cart-total" class="text-2xl">$0.00</span>
+                        </div>
+                        <button onclick="checkout()" class="w-full bg-success text-white font-bold py-3 rounded-md text-lg hover:bg-green-600 transition mb-4 shadow text-center flex justify-center items-center">Checkout</button>
+                        <div class="flex justify-center gap-2 cursor-pointer" onclick="showToast('Viewing payment options')">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Stripe_Logo%2C_revised_2016.svg/2560px-Stripe_Logo%2C_revised_2016.svg.png" class="h-4 object-contain opacity-70 hover:opacity-100 transition">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" class="h-4 object-contain opacity-70 hover:opacity-100 transition">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" class="h-5 object-contain opacity-70 hover:opacity-100 transition">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_Pay_logo.svg/2560px-Apple_Pay_logo.svg.png" class="h-5 object-contain opacity-70 hover:opacity-100 transition">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Saved for later -->
+            <div class="mt-2 bg-white p-5 border border-border rounded-md shadow-sm mb-10 hidden" id="saved-for-later-section">
+                <h3 class="font-bold text-xl text-dark mb-4">Saved for later</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="saved-items-container">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Banner (Only visible on Home) -->
+        <div id="newsletter-banner" class="bg-[#EFF2F4] text-center py-12 -mx-4 lg:-mx-8 -mb-6 mt-10">
+            <h3 class="font-bold text-xl mb-2 text-dark">Subscribe on our newsletter</h3>
+            <p class="text-gray-500 mb-6 text-[15px]">Get daily news on upcoming offers from many suppliers all over the world</p>
+            <div class="flex justify-center px-4">
+                <div class="flex items-center bg-white rounded flex-grow max-w-sm border border-border overflow-hidden focus-within:border-primary">
+                    <i class="fa-regular fa-envelope text-gray-400 pl-3"></i>
+                    <input type="email" placeholder="Email" class="px-3 py-2 w-full outline-none text-sm placeholder-gray-400">
+                </div>
+                <button onclick="showToast('Subscribed successfully!')" class="bg-primary text-white px-6 py-2 rounded ml-2 font-medium hover:bg-blue-700 transition shadow-sm">Subscribe</button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="bg-white border-t border-border pt-10 mt-10">
+        <div class="container mx-auto px-4 lg:px-8 grid grid-cols-2 md:grid-cols-6 gap-6 mb-10">
+            <div class="col-span-2 md:col-span-2 pr-4">
+                <div class="flex items-center mb-4 cursor-pointer" onclick="navigate('home')">
+                    <div class="bg-primary text-white w-9 h-9 rounded flex items-center justify-center font-bold text-lg mr-2"><i class="fa-solid fa-basket-shopping"></i></div>
+                    <span class="text-2xl font-bold text-primary" style="color: #8CB7F5;">Brand</span>
+                </div>
+                <p class="text-gray-600 text-[15px] mb-5 leading-relaxed">Your one-stop destination for the best electronic items, clothing, and global products. Quality and trust guaranteed.</p>
+                <div class="flex space-x-3 text-gray-400">
+                    <div onclick="showToast('Opening Facebook...')" class="bg-gray-200 text-gray-600 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-primary hover:text-white transition"><i class="fa-brands fa-facebook-f text-sm"></i></div>
+                    <div onclick="showToast('Opening Twitter...')" class="bg-gray-200 text-gray-600 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-primary hover:text-white transition"><i class="fa-brands fa-twitter text-sm"></i></div>
+                    <div onclick="showToast('Opening LinkedIn...')" class="bg-gray-200 text-gray-600 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-primary hover:text-white transition"><i class="fa-brands fa-linkedin-in text-sm"></i></div>
+                    <div onclick="showToast('Opening Instagram...')" class="bg-gray-200 text-gray-600 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-primary hover:text-white transition"><i class="fa-brands fa-instagram text-sm"></i></div>
+                </div>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4 text-dark text-[15px]">About</h4>
+                <ul class="text-[15px] text-gray-500 space-y-2.5">
+                    <li class="hover:text-primary cursor-pointer" onclick="showToast('Navigating to About Us')">About Us</li>
+                    <li class="hover:text-primary cursor-pointer" onclick="showToast('Navigating to Find Store')">Find store</li>
+                    <li class="hover:text-primary cursor-pointer" onclick="showToast('Navigating to Categories')">Categories</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4 text-dark text-[15px]">Information</h4>
+                <ul class="text-[15px] text-gray-500 space-y-2.5">
+                    <li class="hover:text-primary cursor-pointer" onclick="showToast('Navigating to Help Center')">Help Center</li>
+                    <li class="hover:text-primary cursor-pointer" onclick="showToast('Navigating to Money Refund')">Money Refund</li>
+                    <li class="hover:text-primary cursor-pointer" onclick="showToast('Navigating to Shipping Policies')">Shipping</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4 text-dark text-[15px]">For users</h4>
+                <ul class="text-[15px] text-gray-500 space-y-2.5">
+                    <li class="hover:text-primary cursor-pointer" onclick="showToast('Opening Login Modal')">Login</li>
+                    <li class="hover:text-primary cursor-pointer" onclick="showToast('Opening Register Modal')">Register</li>
+                    <li class="hover:text-primary cursor-pointer" onclick="navigate('cart')">My Cart</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4 text-dark text-[15px]">Get app</h4>
+                <div class="flex flex-col gap-2">
+                    <div class="bg-dark text-white rounded-md px-3 py-2 flex items-center gap-2 cursor-pointer hover:bg-gray-800 transition" onclick="showToast('Opening App Store')">
+                        <i class="fa-brands fa-apple text-2xl"></i>
+                        <div class="leading-none"><div class="text-[10px]">Download on the</div><div class="text-sm font-medium">App Store</div></div>
+                    </div>
+                    <div class="bg-dark text-white rounded-md px-3 py-2 flex items-center gap-2 cursor-pointer hover:bg-gray-800 transition" onclick="showToast('Opening Google Play')">
+                        <i class="fa-brands fa-google-play text-xl ml-1"></i>
+                        <div class="leading-none ml-1"><div class="text-[10px]">GET IT ON</div><div class="text-sm font-medium">Google Play</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-[#EFF2F4] py-5 border-t border-border">
+            <div class="container mx-auto px-4 lg:px-8 flex justify-between items-center text-[15px] text-gray-600">
+                <p>&copy; 2026 E-commerce Brand.</p>
+                <div class="flex items-center gap-2 cursor-pointer hover:text-dark">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/1200px-Flag_of_the_United_States.svg.png" class="h-3 w-4 object-cover rounded-sm">
+                    <span class="font-medium">English</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS Logic -->
+    <script>
+        // Enhanced Product Database
+        const mockProducts = [
+            { id: 1, name: "GoPro HERO6 4K Action Camera - Black", category: "Electronics", brand: "Apple", price: 299.50, oldPrice: 350.00, rating: 4.5, condition: "Brand new", features: ["Waterproof", "4K Video"], reviews: 154, image: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80", desc: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." },
+            { id: 2, name: "Canon Camera EOS 2000, Black 10x zoom", category: "Electronics", brand: "Samsung", price: 998.00, oldPrice: 1128.00, rating: 4.8, condition: "Brand new", features: ["10x Zoom", "HD Quality"], reviews: 154, image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80", desc: "High-quality professional camera with modern tech and advanced lens system." },
+            { id: 3, name: "Apple Watch Series Space Gray", category: "Electronics", brand: "Apple", price: 399.00, oldPrice: null, rating: 4.9, condition: "Brand new", features: ["Waterproof", "Heart Monitor"], reviews: 340, image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80", desc: "Modern tech wearable with health tracking, GPS, and cellular connectivity options." },
+            { id: 4, name: "Premium Wireless Gaming Headphones", category: "Electronics", brand: "Lenovo", price: 149.00, oldPrice: 199.00, rating: 4.3, condition: "Refurbished", features: ["Noise Cancellation", "Wireless"], reviews: 89, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80", desc: "Noise cancelling wireless headphones perfect for gaming and music production. Crystal clear mic included." },
+            { id: 5, name: "Xiaomi Redmi 8 Original Smartphone", category: "Smartphones", brand: "Xiaomi", price: 132.00, oldPrice: 150.00, rating: 4.1, condition: "Brand new", features: ["Long Battery", "Dual Camera"], reviews: 210, image: "https://images.unsplash.com/photo-1583394838336-acd977736f90?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80", desc: "Great budget smartphone with dual camera, long lasting battery, and fast charging feature." },
+            { id: 6, name: "Mens Long Sleeve T-shirt Cotton Base", category: "Clothings", brand: "Generic", price: 28.00, oldPrice: 40.00, rating: 4.6, condition: "Brand new", features: ["Cotton"], reviews: 32, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80", desc: "Comfortable and stylish cotton long sleeve t-shirt." },
+            { id: 7, name: "Samsung Galaxy S21 Ultra 5G", category: "Smartphones", brand: "Samsung", price: 850.00, oldPrice: 999.00, rating: 4.7, condition: "Refurbished", features: ["5G", "Large Memory"], reviews: 420, image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80", desc: "A flagship smartphone with incredible zoom capabilities and stunning display." },
+            { id: 8, name: "Modern Leather Sofa - Brown", category: "Home interiors", brand: "Generic", price: 450.00, oldPrice: 500.00, rating: 4.4, condition: "Brand new", features: ["Leather"], reviews: 18, image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80", desc: "Beautiful brown leather sofa that will upgrade your living room interior." },
+            { id: 9, name: "Huawei MateBook X Pro Laptop", category: "Electronics", brand: "Huawei", price: 1200.00, oldPrice: null, rating: 4.8, condition: "Brand new", features: ["Large Memory", "Fast Processor"], reviews: 95, image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80", desc: "Premium ultrabook with touchscreen and powerful internals for professionals." },
+            { id: 10, name: "Classic Blue Jeans for Men", category: "Clothings", brand: "Generic", price: 45.00, oldPrice: 55.00, rating: 4.2, condition: "Brand new", features: ["Denim"], reviews: 204, image: "https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80", desc: "Durable and fashionable blue jeans with a classic fit." }
+        ];
+
+        // Unique filter values derived from products
+        const ALL_CATEGORIES = [...new Set(mockProducts.map(p => p.category))];
+        const ALL_BRANDS = [...new Set(mockProducts.map(p => p.brand))];
+        const ALL_FEATURES = [...new Set(mockProducts.flatMap(p => p.features))];
+
+        // App State
+        let cart = [];
+        let savedItems = [];
+        let currentProductView = 'grid'; // Default Grid
+        let currentProductId = null;
+        
+        let activeFilters = {
+            search: '',
+            category: 'All',
+            brands: [],
+            features: [],
+            priceMin: null,
+            priceMax: null,
+            condition: 'Any'
+        };
+
+        // Initialize Application
+        function init() {
+            populateSidebarFilters();
+            updateCartUI();
+            
+            // Check hash to route (simple router)
+            const hash = window.location.hash.replace('#', '') || 'home';
+            navigate(hash);
+        }
+
+        // Routing
+        function navigate(pageId) {
+            document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('newsletter-banner').style.display = 'none'; 
+
+            if(pageId === 'products') {
+                document.getElementById('page-products').classList.add('active');
+                renderProducts();
+            } else if(pageId === 'detail') {
+                document.getElementById('page-detail').classList.add('active');
+            } else if(pageId === 'cart') {
+                document.getElementById('page-cart').classList.add('active');
+                renderCartPage();
+            } else {
+                document.getElementById('page-home').classList.add('active');
+                document.getElementById('newsletter-banner').style.display = 'block';
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.location.hash = pageId;
+        }
+
+        // Search Functionality
+        function executeSearch() {
+            const query = document.getElementById('header-search').value.trim().toLowerCase();
+            const category = document.getElementById('header-category').value;
+            
+            activeFilters.search = query;
+            activeFilters.category = category;
+            
+            // Clear other filters for fresh search
+            activeFilters.brands = [];
+            activeFilters.features = [];
+            activeFilters.priceMin = null;
+            activeFilters.priceMax = null;
+            activeFilters.condition = 'Any';
+            
+            syncSidebarDOM();
+            navigate('products');
+            showToast('Search executed');
+        }
+
+        function setCategoryFilter(category) {
+            activeFilters.category = category;
+            activeFilters.search = ''; // clear search when clicking generic category
+            syncSidebarDOM();
+            navigate('products');
+        }
+
+        // Toast Notification
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'bg-dark text-white px-5 py-3 rounded shadow-floating transform transition-all duration-300 translate-y-10 opacity-0 text-sm font-medium';
+            toast.innerHTML = `<i class="fa-solid fa-circle-info mr-2 text-primary"></i> ${message}`;
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        // Products Page - View Toggles
+        function toggleProductView(view) {
+            currentProductView = view;
+            if(view === 'list') {
+                document.getElementById('btn-view-list').classList.replace('bg-white', 'bg-[#EFF2F4]');
+                document.getElementById('btn-view-list').classList.replace('text-grayish', 'text-dark');
+                document.getElementById('btn-view-grid').classList.replace('bg-[#EFF2F4]', 'bg-white');
+                document.getElementById('btn-view-grid').classList.replace('text-dark', 'text-grayish');
+            } else {
+                document.getElementById('btn-view-grid').classList.replace('bg-white', 'bg-[#EFF2F4]');
+                document.getElementById('btn-view-grid').classList.replace('text-grayish', 'text-dark');
+                document.getElementById('btn-view-list').classList.replace('bg-[#EFF2F4]', 'bg-white');
+                document.getElementById('btn-view-list').classList.replace('text-dark', 'text-grayish');
+            }
+            renderProducts();
+        }
+
+        // Sidebar Filters Logic
+        function populateSidebarFilters() {
+            // Categories
+            const catList = document.getElementById('filter-categories-list');
+            catList.innerHTML = `<li class="hover:text-primary cursor-pointer ${activeFilters.category === 'All' ? 'text-primary font-bold' : ''}" onclick="setCategoryFilter('All')">All Categories</li>`;
+            ALL_CATEGORIES.forEach(cat => {
+                catList.innerHTML += `<li class="hover:text-primary cursor-pointer ${activeFilters.category === cat ? 'text-primary font-bold' : ''}" onclick="setCategoryFilter('${cat}')">${cat}</li>`;
+            });
+
+            // Brands
+            document.getElementById('filter-brands-list').innerHTML = ALL_BRANDS.map(brand => `
+                <li><label class="flex items-center cursor-pointer">
+                    <input type="checkbox" name="filter-brand" value="${brand}" class="mr-3 border-gray-300 rounded" onchange="applyFilters()"> ${brand}
+                </label></li>
+            `).join('');
+
+            // Features
+            document.getElementById('filter-features-list').innerHTML = ALL_FEATURES.map(feat => `
+                <li><label class="flex items-center cursor-pointer">
+                    <input type="checkbox" name="filter-feature" value="${feat}" class="mr-3 border-gray-300 rounded" onchange="applyFilters()"> ${feat}
+                </label></li>
+            `).join('');
+        }
+
+        function syncSidebarDOM() {
+            // Update Category styling
+            populateSidebarFilters(); // lazy way to update category bold state
+            
+            // Checkboxes
+            document.querySelectorAll('input[name="filter-brand"]').forEach(cb => {
+                cb.checked = activeFilters.brands.includes(cb.value);
+            });
+            document.querySelectorAll('input[name="filter-feature"]').forEach(cb => {
+                cb.checked = activeFilters.features.includes(cb.value);
+            });
+            document.querySelectorAll('input[name="filter-condition"]').forEach(rb => {
+                rb.checked = activeFilters.condition === rb.value;
+            });
+
+            // Prices
+            document.getElementById('filter-price-min').value = activeFilters.priceMin || '';
+            document.getElementById('filter-price-max').value = activeFilters.priceMax || '';
+        }
+
+        function applyFilters() {
+            // Read Brands
+            const checkedBrands = document.querySelectorAll('input[name="filter-brand"]:checked');
+            activeFilters.brands = Array.from(checkedBrands).map(cb => cb.value);
+
+            // Read Features
+            const checkedFeat = document.querySelectorAll('input[name="filter-feature"]:checked');
+            activeFilters.features = Array.from(checkedFeat).map(cb => cb.value);
+
+            // Read Condition
+            const cond = document.querySelector('input[name="filter-condition"]:checked');
+            activeFilters.condition = cond ? cond.value : 'Any';
+
+            // Read Price
+            const pMin = document.getElementById('filter-price-min').value;
+            const pMax = document.getElementById('filter-price-max').value;
+            activeFilters.priceMin = pMin ? parseFloat(pMin) : null;
+            activeFilters.priceMax = pMax ? parseFloat(pMax) : null;
+
+            renderProducts();
+        }
+
+        function removeFilter(type, val) {
+            if(type === 'brand') activeFilters.brands = activeFilters.brands.filter(b => b !== val);
+            if(type === 'feature') activeFilters.features = activeFilters.features.filter(f => f !== val);
+            if(type === 'condition') activeFilters.condition = 'Any';
+            if(type === 'search') activeFilters.search = '';
+            
+            syncSidebarDOM();
+            renderProducts();
+        }
+
+        function clearAllFilters() {
+            activeFilters = {
+                search: '',
+                category: activeFilters.category, // Keep current category
+                brands: [],
+                features: [],
+                priceMin: null,
+                priceMax: null,
+                condition: 'Any'
+            };
+            document.getElementById('header-search').value = '';
+            syncSidebarDOM();
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('products-container');
+            const badgesContainer = document.getElementById('active-filters-container');
+            document.getElementById('breadcrumb-category').innerText = activeFilters.category;
+
+            // Apply filter logic
+            const filteredProducts = mockProducts.filter(p => {
+                if (activeFilters.category !== 'All' && p.category !== activeFilters.category) return false;
+                if (activeFilters.search && !p.name.toLowerCase().includes(activeFilters.search)) return false;
+                if (activeFilters.brands.length > 0 && !activeFilters.brands.includes(p.brand)) return false;
+                if (activeFilters.features.length > 0 && !activeFilters.features.some(f => p.features.includes(f))) return false;
+                if (activeFilters.condition !== 'Any' && p.condition !== activeFilters.condition) return false;
+                if (activeFilters.priceMin !== null && p.price < activeFilters.priceMin) return false;
+                if (activeFilters.priceMax !== null && p.price > activeFilters.priceMax) return false;
+                return true;
+            });
+
+            document.getElementById('product-count').innerText = filteredProducts.length;
+
+            // Render Active Filter Badges
+            let badgesHTML = '';
+            if(activeFilters.search) badgesHTML += `<span class="border border-primary rounded px-2 py-1 text-[13px] flex items-center gap-2 bg-white text-gray-600 cursor-pointer" onclick="removeFilter('search', '')">"${activeFilters.search}" <i class="fa-solid fa-xmark text-gray-400"></i></span>`;
+            activeFilters.brands.forEach(b => {
+                badgesHTML += `<span class="border border-primary rounded px-2 py-1 text-[13px] flex items-center gap-2 bg-white text-gray-600 cursor-pointer" onclick="removeFilter('brand', '${b}')">${b} <i class="fa-solid fa-xmark text-gray-400"></i></span>`;
+            });
+            activeFilters.features.forEach(f => {
+                badgesHTML += `<span class="border border-primary rounded px-2 py-1 text-[13px] flex items-center gap-2 bg-white text-gray-600 cursor-pointer" onclick="removeFilter('feature', '${f}')">${f} <i class="fa-solid fa-xmark text-gray-400"></i></span>`;
+            });
+            if(activeFilters.condition !== 'Any') {
+                badgesHTML += `<span class="border border-primary rounded px-2 py-1 text-[13px] flex items-center gap-2 bg-white text-gray-600 cursor-pointer" onclick="removeFilter('condition', '')">${activeFilters.condition} <i class="fa-solid fa-xmark text-gray-400"></i></span>`;
+            }
+            if(badgesHTML !== '') {
+                badgesHTML += `<span class="text-primary text-[14px] cursor-pointer ml-2 py-1 hover:underline" onclick="clearAllFilters()">Clear all</span>`;
+            }
+            badgesContainer.innerHTML = badgesHTML;
+
+            // Render Products Grid/List
+            container.innerHTML = '';
+            if(filteredProducts.length === 0) {
+                container.innerHTML = `<div class="p-10 text-center text-gray-500">No products match your filters. Try adjusting them.</div>`;
+                return;
+            }
+
+            if (currentProductView === 'list') {
+                container.className = 'grid grid-cols-1 gap-4';
+                filteredProducts.forEach(prod => {
+                    container.innerHTML += `
+                        <div class="bg-white border border-border rounded-md p-4 flex flex-col sm:flex-row gap-6 hover:shadow-md transition relative">
+                            <div class="sm:w-[210px] h-[210px] flex-shrink-0 flex items-center justify-center cursor-pointer bg-white" onclick="showDetail(${prod.id})">
+                                <img src="${prod.image}" alt="${prod.name}" class="max-h-[90%] max-w-[90%] object-contain">
+                            </div>
+                            <div class="flex-grow flex flex-col justify-center">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-medium text-[17px] text-dark cursor-pointer hover:text-primary leading-snug w-5/6" onclick="showDetail(${prod.id})">${prod.name}</h3>
+                                    <button onclick="saveForLaterById(${prod.id})" class="text-primary bg-white border border-border rounded w-9 h-9 flex items-center justify-center hover:bg-secondary transition flex-shrink-0 shadow-sm"><i class="fa-solid fa-heart"></i></button>
+                                </div>
+                                <div class="flex items-baseline gap-2 mb-2">
+                                    <span class="text-xl font-bold text-dark">$${prod.price.toFixed(2)}</span>
+                                    ${prod.oldPrice ? `<span class="text-[15px] text-grayish line-through">$${prod.oldPrice.toFixed(2)}</span>` : ''}
+                                </div>
+                                <div class="flex items-center text-sm gap-4 mb-3">
+                                    <div class="text-warning"><i class="fa-solid fa-star"></i><span class="ml-1 font-bold">${prod.rating}</span></div>
+                                    <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                                    <div class="text-gray-500">${prod.reviews} orders</div>
+                                    <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                                    <div class="text-success font-medium">Free Shipping</div>
+                                </div>
+                                <p class="text-[15px] text-gray-600 line-clamp-2 leading-relaxed mb-4">${prod.desc}</p>
+                                <div><button onclick="showDetail(${prod.id})" class="text-primary font-medium hover:underline text-[15px]">View details</button></div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                container.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4';
+                filteredProducts.forEach(prod => {
+                    container.innerHTML += `
+                        <div class="bg-white border border-border rounded-md p-4 flex flex-col relative hover:shadow-md transition">
+                            <button onclick="saveForLaterById(${prod.id})" class="absolute top-4 right-4 text-grayish border border-border rounded w-9 h-9 flex items-center justify-center hover:text-primary shadow-sm bg-white z-10"><i class="fa-solid fa-heart"></i></button>
+                            <div class="h-[210px] flex items-center justify-center mb-4 cursor-pointer" onclick="showDetail(${prod.id})">
+                                <img src="${prod.image}" alt="${prod.name}" class="max-h-full max-w-full object-contain">
+                            </div>
+                            <div class="flex flex-col flex-grow">
+                                <div class="flex items-baseline gap-2 mb-1 border-t border-border pt-4">
+                                    <span class="text-lg font-bold text-dark">$${prod.price.toFixed(2)}</span>
+                                    ${prod.oldPrice ? `<span class="text-sm text-grayish line-through">$${prod.oldPrice.toFixed(2)}</span>` : ''}
+                                </div>
+                                <div class="flex items-center text-[13px] gap-2 mb-2 text-warning font-bold">
+                                    <span><i class="fa-solid fa-star"></i> ${prod.rating}</span>
+                                </div>
+                                <h3 class="text-gray-600 text-[15px] mb-auto cursor-pointer hover:text-primary line-clamp-2 leading-snug" onclick="showDetail(${prod.id})">${prod.name}</h3>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        // --- Detail Page ---
+        function showDetail(id) {
+            const prod = mockProducts.find(p => p.id === id);
+            if(!prod) return;
+            currentProductId = id;
+
+            // Populate Content
+            document.getElementById('detail-breadcrumb').innerText = prod.name;
+            const mainImg = document.getElementById('detail-main-img');
+            mainImg.src = prod.image;
+            
+            document.getElementById('detail-title').innerText = prod.name;
+            document.getElementById('detail-price').innerText = prod.price.toFixed(2);
+            document.getElementById('detail-reviews-count').innerText = prod.reviews;
+            document.getElementById('detail-orders').innerText = Math.floor(prod.reviews * 1.5);
+            document.getElementById('detail-rating').innerText = prod.rating;
+            
+            document.getElementById('detail-brand').innerText = prod.brand;
+            document.getElementById('detail-condition').innerText = prod.condition;
+            document.getElementById('detail-features').innerText = prod.features.join(', ') || 'Standard';
+            document.getElementById('detail-description-text').innerText = prod.desc + " " + prod.desc;
+            
+            document.getElementById('desc-table-cond').innerText = prod.condition;
+            document.getElementById('desc-table-brand').innerText = prod.brand;
+
+            // Generate thumbnails
+            const tnContainer = document.getElementById('detail-thumbnails');
+            tnContainer.innerHTML = '';
+            for(let i=0; i<4; i++) {
+                // cycle through product images randomly to mock gallery
+                let rImg = mockProducts[(id + i) % mockProducts.length].image;
+                tnContainer.innerHTML += `
+                    <div class="border ${i===0 ? 'border-primary' : 'border-border opacity-70 hover:opacity-100'} rounded p-1 w-1/4 cursor-pointer h-16 transition-opacity" onclick="updateMainImage(this, '${rImg}')">
+                        <img src="${rImg}" class="w-full h-full object-contain">
+                    </div>`;
+            }
+
+            // Populate recommendations sidebar
+            const recContainer = document.getElementById('detail-sidebar-recommended');
+            recContainer.innerHTML = mockProducts.slice(0, 4).map(p => `
+                <div class="flex gap-3 cursor-pointer hover:opacity-80 transition" onclick="showDetail(${p.id})">
+                    <div class="w-16 h-16 border border-border rounded flex-shrink-0 p-1 bg-white"><img src="${p.image}" class="w-full h-full object-contain"></div>
+                    <div class="flex flex-col justify-center">
+                        <h4 class="text-sm text-dark font-medium line-clamp-2 leading-snug mb-1">${p.name}</h4>
+                        <span class="text-sm text-gray-500">$${p.price.toFixed(2)}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            switchDetailTab('desc');
+            navigate('detail');
+        }
+
+        function updateMainImage(elem, src) {
+            document.getElementById('detail-main-img').src = src;
+            // update borders
+            const parent = elem.parentElement;
+            parent.querySelectorAll('div').forEach(div => {
+                div.classList.replace('border-primary', 'border-border');
+                div.classList.add('opacity-70');
+            });
+            elem.classList.replace('border-border', 'border-primary');
+            elem.classList.remove('opacity-70');
+        }
+
+        function switchDetailTab(tabId) {
+            document.querySelectorAll('.detail-tab-btn').forEach(el => {
+                el.classList.remove('border-primary', 'text-primary');
+                el.classList.add('border-transparent', 'hover:text-dark');
+            });
+            document.querySelectorAll('.detail-tab-content').forEach(el => {
+                el.classList.remove('block');
+                el.classList.add('hidden');
+            });
+
+            const activeBtn = document.getElementById('tab-' + tabId);
+            const activeContent = document.getElementById('content-' + tabId);
+            if(activeBtn && activeContent) {
+                activeBtn.classList.remove('border-transparent', 'hover:text-dark');
+                activeBtn.classList.add('border-primary', 'text-primary');
+                activeContent.classList.remove('hidden');
+                activeContent.classList.add('block');
+            }
+        }
+
+        // --- Cart Logic ---
+        function addCurrentToCart(event) {
+            if(!currentProductId) return;
+            const prod = mockProducts.find(p => p.id === currentProductId);
+            
+            const existing = cart.find(i => i.id === currentProductId);
+            if(existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ ...prod, qty: 1 });
+            }
+            updateCartUI();
+            
+            // Visual feedback
+            const btn = event.target;
+            const origText = btn.innerHTML;
+            btn.innerHTML = "<i class='fa-solid fa-check mr-2'></i> Added";
+            btn.classList.add("bg-success", "pointer-events-none");
+            btn.classList.remove("bg-primary", "hover:bg-blue-700");
+            setTimeout(() => {
+                btn.innerHTML = origText;
+                btn.classList.remove("bg-success", "pointer-events-none");
+                btn.classList.add("bg-primary", "hover:bg-blue-700");
+            }, 1500);
+            showToast('Added to Cart');
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            updateCartUI();
+            if(document.getElementById('page-cart').classList.contains('active')){
+                renderCartPage();
+            }
+            showToast('Item removed from cart');
+        }
+
+        function clearCart() {
+            cart = [];
+            updateCartUI();
+            renderCartPage();
+            showToast('Cart cleared!');
+        }
+
+        function updateQty(id, delta) {
+            const item = cart.find(i => i.id === id);
+            if(item) {
+                item.qty += delta;
+                if(item.qty <= 0) {
+                    removeFromCart(id);
+                } else {
+                    updateCartUI();
+                    if(document.getElementById('page-cart').classList.contains('active')){
+                        renderCartPage();
+                    }
+                }
+            }
+        }
+
+        function updateCartUI() {
+            const badge = document.getElementById('cart-badge');
+            const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+            if(totalItems > 0) {
+                badge.innerText = totalItems;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+            document.getElementById('cart-count-header').innerText = totalItems;
+        }
+
+        // --- Saved for later functionality ---
+        function saveCurrentForLater() {
+            if(!currentProductId) return;
+            saveForLaterById(currentProductId);
+        }
+
+        function saveForLaterById(id) {
+            const prod = mockProducts.find(p => p.id === id);
+            if(prod && !savedItems.find(i => i.id === id)) {
+                savedItems.push(prod);
+                showToast('Saved for later');
+                if(document.getElementById('page-cart').classList.contains('active')) renderCartPage();
+            } else {
+                showToast('Item is already in your saved list');
+            }
+        }
+
+        function moveCartItemToSaved(id) {
+            const item = cart.find(i => i.id === id);
+            if(item) {
+                saveForLaterById(id);
+                removeFromCart(id);
+            }
+        }
+
+        function moveSavedItemToCart(id) {
+            const prod = savedItems.find(p => p.id === id);
+            if(prod) {
+                savedItems = savedItems.filter(i => i.id !== id); // remove from saved
+                
+                const existing = cart.find(i => i.id === id);
+                if(existing) existing.qty += 1;
+                else cart.push({ ...prod, qty: 1 });
+                
+                updateCartUI();
+                renderCartPage();
+                showToast('Moved to Cart');
+            }
+        }
+
+        function renderCartPage() {
+            const container = document.getElementById('cart-items-container');
+            if(cart.length === 0) {
+                container.innerHTML = '<div class="p-10 text-center text-gray-500 font-medium">Your cart is empty.</div>';
+                document.getElementById('cart-subtotal').innerText = "$0.00";
+                document.getElementById('cart-tax').innerText = "+ $0.00";
+                document.getElementById('cart-total').innerText = "$0.00";
+            } else {
+                let html = '';
+                let subtotal = 0;
+
+                cart.forEach((item, index) => {
+                    subtotal += (item.price * item.qty);
+                    html += `
+                        <div class="p-5 flex flex-col sm:flex-row gap-5 ${index !== cart.length - 1 ? 'border-b border-border' : ''}">
+                            <div class="w-[100px] h-[100px] border border-border rounded flex items-center justify-center p-2 bg-white flex-shrink-0 cursor-pointer" onclick="showDetail(${item.id})">
+                                <img src="${item.image}" alt="${item.name}" class="max-h-full max-w-full object-contain">
+                            </div>
+                            <div class="flex-grow flex flex-col justify-between">
+                                <div>
+                                    <h4 class="font-medium text-dark text-[15px] mb-1 leading-snug w-11/12 cursor-pointer hover:text-primary" onclick="showDetail(${item.id})">${item.name}</h4>
+                                    <div class="text-[13px] text-gray-500 mb-1">Brand: ${item.brand} | Cond: ${item.condition}</div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button onclick="removeFromCart(${item.id})" class="text-danger text-[13px] font-medium hover:bg-red-50 border border-transparent hover:border-red-200 px-3 py-1.5 rounded transition shadow-sm">Remove</button>
+                                    <button onclick="moveCartItemToSaved(${item.id})" class="text-primary text-[13px] font-medium hover:bg-secondary border border-transparent hover:border-blue-200 px-3 py-1.5 rounded transition shadow-sm">Save for later</button>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end justify-between flex-shrink-0 mt-4 sm:mt-0">
+                                <div class="font-bold text-dark text-lg mb-4">$${item.price.toFixed(2)}</div>
+                                <div class="flex items-center border border-border rounded bg-white overflow-hidden">
+                                    <button onclick="updateQty(${item.id}, -1)" class="px-3 py-1 text-gray-600 hover:bg-gray-100 border-r border-border"><i class="fa-solid fa-minus text-[10px]"></i></button>
+                                    <span class="w-12 text-center text-[15px] text-dark font-medium">${item.qty}</span>
+                                    <button onclick="updateQty(${item.id}, 1)" class="px-3 py-1 text-gray-600 hover:bg-gray-100 border-l border-border"><i class="fa-solid fa-plus text-[10px]"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+
+                const taxRate = 0.10; // 10% mock tax
+                const tax = subtotal * taxRate;
+                const total = subtotal + tax;
+                
+                document.getElementById('cart-subtotal').innerText = `$${subtotal.toFixed(2)}`;
+                document.getElementById('cart-tax').innerText = `+ $${tax.toFixed(2)}`;
+                document.getElementById('cart-total').innerText = `$${total.toFixed(2)}`;
+            }
+
+            // Render Saved Items Section
+            const savedSection = document.getElementById('saved-for-later-section');
+            const savedContainer = document.getElementById('saved-items-container');
+            
+            if(savedItems.length > 0) {
+                savedSection.classList.remove('hidden');
+                savedContainer.innerHTML = savedItems.map(prod => `
+                    <div class="flex flex-col bg-white border border-border rounded p-4 hover:shadow-md transition group">
+                        <div class="h-[150px] flex items-center justify-center mb-3 bg-white rounded p-2 relative overflow-hidden cursor-pointer" onclick="showDetail(${prod.id})">
+                            <img src="${prod.image}" class="max-h-full max-w-full object-contain mix-blend-multiply group-hover:scale-105 transition">
+                        </div>
+                        <div class="font-bold text-[17px] text-dark mb-1">$${prod.price.toFixed(2)}</div>
+                        <h4 class="text-[14px] text-gray-600 mb-4 line-clamp-2 leading-snug cursor-pointer hover:text-primary" onclick="showDetail(${prod.id})">${prod.name}</h4>
+                        <div class="flex gap-2 mt-auto">
+                            <button onclick="moveSavedItemToCart(${prod.id})" class="flex-grow flex items-center justify-center text-primary text-[14px] font-medium border border-primary rounded py-1.5 hover:bg-primary hover:text-white transition"><i class="fa-solid fa-cart-shopping mr-2"></i> Move to cart</button>
+                            <button onclick="removeSavedItem(${prod.id})" class="w-9 flex items-center justify-center text-gray-400 hover:text-danger border border-border rounded"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                savedSection.classList.add('hidden');
+            }
+        }
+
+        function removeSavedItem(id) {
+            savedItems = savedItems.filter(i => i.id !== id);
+            renderCartPage();
+            showToast('Removed from saved items');
+        }
+
+        function checkout() {
+            if(cart.length === 0) {
+                showToast("Your cart is empty!");
+                return;
+            }
+            showToast("Proceeding to secure checkout...");
+            setTimeout(() => { clearCart(); navigate('home'); showToast("Order Placed Successfully!"); }, 2000);
+        }
+
+        // Boot
+        window.onload = init;
+    </script>
+</body>
+</html>
